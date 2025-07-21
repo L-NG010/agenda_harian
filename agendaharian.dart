@@ -530,3 +530,5 @@ void main() async {
   AgendaInterface app = AgendaInterface();
   app.jalankan();
 }
+
+// syarat tok

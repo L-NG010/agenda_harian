@@ -524,11 +524,3 @@ class AgendaInterface {
     print("Total kegiatan saat ini: ${agenda.jumlahKegiatan}");
   }
 }
-
-// Main function
-void main() async {
-  AgendaInterface app = AgendaInterface();
-  app.jalankan();
-}
-
-// syarat tok

@@ -164,7 +164,6 @@ class AgendaInterface {
   }
 }
 
-// Entry point aplikasi
 void main() {
   AgendaInterface app = AgendaInterface();
   app.jalankan();

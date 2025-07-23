@@ -1,17 +1,18 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:math';
 import 'kegiatan.dart';
 
 // Class utama untuk mengelola agenda harian
 class AgendaHarian {
   List<Kegiatan> _daftarKegiatan = [];
   static const String namaFile = 'agendaharian.json';
-
+  
   // Constructor yang otomatis memuat data dari file
   AgendaHarian() {
     muatDariFile();
   }
-
+  
   // Method untuk menyimpan ke file JSON
   Future<void> simpanKeFile() async {
     try {
@@ -30,7 +31,7 @@ class AgendaHarian {
       print("❌ Error menyimpan file: $e");
     }
   }
-
+  
   // Method untuk memuat dari file JSON
   void muatDariFile() {
     try {
@@ -52,14 +53,14 @@ class AgendaHarian {
       _daftarKegiatan = []; // Reset ke list kosong jika error
     }
   }
-
+  
   // Method untuk menambah kegiatan baru
   Future<void> tambahKegiatan(Kegiatan kegiatan) async {
     _daftarKegiatan.add(kegiatan);
     await simpanKeFile(); // Otomatis simpan setelah menambah
     print("✓ Kegiatan '${kegiatan.nama}' berhasil ditambahkan dan disimpan!");
   }
-
+  
   // Method untuk mengurutkan kegiatan berdasarkan prioritas dan waktu
   void urutkanKegiatan() {
     _daftarKegiatan.sort((a, b) {
@@ -74,42 +75,151 @@ class AgendaHarian {
       return perbandinganPrioritas;
     });
   }
-
-  // Method untuk menampilkan agenda dalam bentuk tabel CLI
+  
+  // Method untuk menghitung lebar kolom yang dinamis
+  Map<String, int> _hitungLebarKolom() {
+    if (_daftarKegiatan.isEmpty) {
+      return {
+        'no': 4,
+        'waktu': 11,
+        'kegiatan': 12,
+        'prioritas': 11,
+        'deskripsi': 13
+      };
+    }
+    
+    // Lebar minimum untuk setiap kolom
+    int lebarNo = max(4, _daftarKegiatan.length.toString().length + 2);
+    int lebarWaktu = max(11, "Waktu".length + 2);
+    int lebarKegiatan = max(12, "Kegiatan".length + 2);
+    int lebarPrioritas = max(11, "Prioritas".length + 2);
+    int lebarDeskripsi = max(13, "Deskripsi".length + 2);
+    
+    // Hitung lebar maksimum berdasarkan konten
+    for (Kegiatan k in _daftarKegiatan) {
+      lebarWaktu = max(lebarWaktu, k.formatWaktu.length + 2);
+      lebarKegiatan = max(lebarKegiatan, k.nama.length + 2);
+      lebarPrioritas = max(lebarPrioritas, k.formatPrioritas.length + 2);
+      lebarDeskripsi = max(lebarDeskripsi, (k.deskripsi ?? "").length + 2);
+    }
+    
+    return {
+      'no': lebarNo,
+      'waktu': lebarWaktu,
+      'kegiatan': lebarKegiatan,
+      'prioritas': lebarPrioritas,
+      'deskripsi': lebarDeskripsi
+    };
+  }
+  
+  // Method untuk membuat separator tabel
+  String _buatSeparator(Map<String, int> lebar) {
+    String separator = "|";
+    separator += "-" * lebar['no']! + "+";
+    separator += "-" * lebar['waktu']! + "+";
+    separator += "-" * lebar['kegiatan']! + "+";
+    separator += "-" * lebar['prioritas']! + "+";
+    separator += "-" * lebar['deskripsi']! + "|";
+    return separator;
+  }
+  
+  // Method untuk memformat baris tabel
+  String _formatBaris(String no, String waktu, String kegiatan, String prioritas, String deskripsi, Map<String, int> lebar) {
+    return "|${no.padLeft(lebar['no']! - 1)} |${waktu.padLeft(lebar['waktu']! - 1)} |${kegiatan.padLeft(lebar['kegiatan']! - 1)} |${prioritas.padLeft(lebar['prioritas']! - 1)} |${deskripsi.padLeft(lebar['deskripsi']! - 1)} |";
+  }
+  
+  // Method untuk menampilkan agenda dalam bentuk tabel CLI dinamis
   void tampilkanAgenda() {
     if (_daftarKegiatan.isEmpty) {
       print("\n❌ Tidak ada kegiatan dalam agenda!");
       return;
     }
-
+    
     urutkanKegiatan();
     
-    print("\n" + "="*80);
-    print("                      📅 AGENDA HARIAN PRIORITAS");
-    print("="*80);
+    // Hitung lebar kolom yang dinamis
+    Map<String, int> lebarKolom = _hitungLebarKolom();
+    
+    // Hitung total lebar tabel
+    int totalLebar = lebarKolom.values.reduce((a, b) => a + b) + 5; // +5 untuk separator
+    
+    print("\n" + "="*totalLebar);
+    print("📅 AGENDA HARIAN PRIORITAS".padLeft((totalLebar + "📅 AGENDA HARIAN PRIORITAS".length) ~/ 2));
+    print("="*totalLebar);
     
     // Header tabel
-    print("| No |    Waktu    |     Kegiatan     |  Prioritas  |      Deskripsi      |");
-    print("|----+-------------+------------------+-------------+---------------------|");
+    print(_formatBaris("No", "Waktu", "Kegiatan", "Prioritas", "Deskripsi", lebarKolom));
+    print(_buatSeparator(lebarKolom));
     
     // Isi tabel
     for (int i = 0; i < _daftarKegiatan.length; i++) {
       Kegiatan k = _daftarKegiatan[i];
-      String no = (i + 1).toString().padLeft(2);
-      String waktu = k.formatWaktu.padRight(9);
-      String nama = k.nama.length > 16 ? k.nama.substring(0, 13) + "..." : k.nama.padRight(16);
-      String prioritas = k.formatPrioritas.padRight(9);
-      String deskripsi = (k.deskripsi ?? "").length > 19 
-          ? (k.deskripsi ?? "").substring(0, 16) + "..." 
-          : (k.deskripsi ?? "").padRight(19);
+      String no = (i + 1).toString();
+      String waktu = k.formatWaktu;
+      String nama = k.nama;
+      String prioritas = k.formatPrioritas;
+      String deskripsi = k.deskripsi ?? "";
       
-      print("| $no |    $waktu   | $nama | $prioritas | $deskripsi |");
+      print(_formatBaris(no, waktu, nama, prioritas, deskripsi, lebarKolom));
     }
     
-    print("="*80);
+    print("="*totalLebar);
     print("Total kegiatan: ${_daftarKegiatan.length}");
   }
-
+  
+  // Method untuk menampilkan agenda dengan mode compact (jika terlalu lebar untuk terminal)
+  void tampilkanAgendaCompact() {
+    if (_daftarKegiatan.isEmpty) {
+      print("\n❌ Tidak ada kegiatan dalam agenda!");
+      return;
+    }
+    
+    urutkanKegiatan();
+    
+    // Batasi lebar maksimum untuk mode compact
+    const int maxLebarKegiatan = 20;
+    const int maxLebarDeskripsi = 25;
+    
+    Map<String, int> lebarKolom = _hitungLebarKolom();
+    
+    // Batasi lebar jika terlalu panjang
+    if (lebarKolom['kegiatan']! > maxLebarKegiatan) {
+      lebarKolom['kegiatan'] = maxLebarKegiatan;
+    }
+    if (lebarKolom['deskripsi']! > maxLebarDeskripsi) {
+      lebarKolom['deskripsi'] = maxLebarDeskripsi;
+    }
+    
+    int totalLebar = lebarKolom.values.reduce((a, b) => a + b) + 5;
+    
+    print("\n" + "="*totalLebar);
+    print("📅 AGENDA HARIAN PRIORITAS".padLeft((totalLebar + "📅 AGENDA HARIAN PRIORITAS".length) ~/ 2));
+    print("="*totalLebar);
+    
+    // Header tabel
+    print(_formatBaris("No", "Waktu", "Kegiatan", "Prioritas", "Deskripsi", lebarKolom));
+    print(_buatSeparator(lebarKolom));
+    
+    // Isi tabel dengan pemotongan teks jika perlu
+    for (int i = 0; i < _daftarKegiatan.length; i++) {
+      Kegiatan k = _daftarKegiatan[i];
+      String no = (i + 1).toString();
+      String waktu = k.formatWaktu;
+      String nama = k.nama.length > maxLebarKegiatan - 2 
+          ? k.nama.substring(0, maxLebarKegiatan - 5) + "..." 
+          : k.nama;
+      String prioritas = k.formatPrioritas;
+      String deskripsi = (k.deskripsi ?? "").length > maxLebarDeskripsi - 2
+          ? (k.deskripsi ?? "").substring(0, maxLebarDeskripsi - 5) + "..."
+          : (k.deskripsi ?? "");
+      
+      print(_formatBaris(no, waktu, nama, prioritas, deskripsi, lebarKolom));
+    }
+    
+    print("="*totalLebar);
+    print("Total kegiatan: ${_daftarKegiatan.length}");
+  }
+  
   // Method untuk menghapus kegiatan
   Future<bool> hapusKegiatan(int index) async {
     if (index >= 0 && index < _daftarKegiatan.length) {
@@ -121,7 +231,7 @@ class AgendaHarian {
     }
     return false;
   }
-
+  
   // Getter untuk mendapatkan jumlah kegiatan
   int get jumlahKegiatan => _daftarKegiatan.length;
 }

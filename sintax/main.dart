@@ -169,7 +169,3 @@ void main() {
   AgendaInterface app = AgendaInterface();
   app.jalankan();
 }
-
-//ini dari galih
-// ini dari lang
-// 1234

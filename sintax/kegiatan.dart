@@ -1,6 +1,5 @@
-
 // Enum untuk tingkat prioritas
-enum Prioritas { rendah, sedang, tinggi, mendesak }
+enum Prioritas { rendah, sedang ,tinggi, mendesak }
 
 // Class untuk merepresentasikan kegiatan
 class Kegiatan {

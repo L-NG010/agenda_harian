@@ -9,11 +9,11 @@ class AgendaInterface {
   // Method utama untuk menjalankan aplikasi
   void jalankan() async {
     tampilkanHeader();
-    
+
     while (true) {
       tampilkanMenu();
       String? pilihan = stdin.readLineSync();
-      
+
       switch (pilihan) {
         case '1':
           await inputKegiatan();
@@ -32,18 +32,18 @@ class AgendaInterface {
         default:
           print("\n❌ Pilihan tidak valid! Silakan coba lagi.");
       }
-      
+
       print("\nTekan Enter untuk melanjutkan...");
       stdin.readLineSync();
     }
   }
 
   void tampilkanHeader() {
-    print("\n" + "="*60);
+    print("\n" + "=" * 60);
     print("        📅 APLIKASI AGENDA HARIAN DENGAN PRIORITAS");
     print("                   Kelompok 7");
     print("    Lang - Alfian - Ashila - Fira - Galih");
-    print("="*60);
+    print("=" * 60);
   }
 
   void tampilkanMenu() {
@@ -59,7 +59,7 @@ class AgendaInterface {
     try {
       print("\n➕ TAMBAH KEGIATAN BARU");
       print("-" * 25);
-      
+
       // Input nama kegiatan
       print("Nama kegiatan: ");
       String? nama = stdin.readLineSync();
@@ -85,7 +85,7 @@ class AgendaInterface {
       print("3. Tinggi");
       print("4. Mendesak");
       print("Pilih (1-4): ");
-      
+
       String? inputPrioritas = stdin.readLineSync();
       Prioritas prioritas = parsePrioritas(inputPrioritas);
 
@@ -102,7 +102,6 @@ class AgendaInterface {
       );
 
       await agenda.tambahKegiatan(kegiatan);
-
     } catch (e) {
       print("❌ Error: $e");
     }
@@ -112,14 +111,14 @@ class AgendaInterface {
     try {
       List<String> bagian = input.split(':');
       if (bagian.length != 2) throw FormatException("Format waktu salah");
-      
+
       int jam = int.parse(bagian[0]);
       int menit = int.parse(bagian[1]);
-      
+
       if (jam < 0 || jam > 23 || menit < 0 || menit > 59) {
         throw FormatException("Waktu tidak valid");
       }
-      
+
       DateTime sekarang = DateTime.now();
       return DateTime(sekarang.year, sekarang.month, sekarang.day, jam, menit);
     } catch (e) {
@@ -150,9 +149,11 @@ class AgendaInterface {
     }
 
     agenda.tampilkanAgenda();
-    print("\nMasukkan nomor kegiatan yang akan dihapus (1-${agenda.jumlahKegiatan}): ");
+    print(
+      "\nMasukkan nomor kegiatan yang akan dihapus (1-${agenda.jumlahKegiatan}): ",
+    );
     String? input = stdin.readLineSync();
-    
+
     try {
       int index = int.parse(input!) - 1;
       if (!await agenda.hapusKegiatan(index)) {
@@ -168,3 +169,5 @@ void main() {
   AgendaInterface app = AgendaInterface();
   app.jalankan();
 }
+
+//ini dari galih

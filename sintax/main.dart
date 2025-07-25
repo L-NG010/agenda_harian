@@ -345,4 +345,3 @@ void main() {
     stdin.readLineSync();
   }
 }
-// halo saya galih

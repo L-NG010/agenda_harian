@@ -115,7 +115,7 @@ void tambahKegiatan() {
     print("3. Tinggi");
     print("4. Mendesak");
     stdout.write("Pilihan (1-4): ");
-    final pilihan = stdin.readLineSync()?.trim();
+    final pilihan = stdin.readLineSync();;
     
     switch (pilihan) {
       case '1':

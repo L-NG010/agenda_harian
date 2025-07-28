@@ -61,7 +61,11 @@ void muatDariFile() {
 
     // Decode JSON dan tambahkan ke daftar kegiatan
     final jsonData = jsonDecode(jsonString) as List;
+    // print(jsonString);
+    // print(jsonData);
+    
     daftarKegiatan = jsonData.map((j) => Kegiatan.fromJson(j)).toList();
+    // print(daftarKegiatan);
   } catch (e) {
     print("Gagal memuat agenda.json: $e");
   }
@@ -156,6 +160,7 @@ void lihatAgenda() {
   daftarKegiatan.sort((a, b) {
     if (a.prioritas != b.prioritas) {
       return b.prioritas.index.compareTo(a.prioritas.index);
+      // bagian untuk mengurutkan berdasarkan prioritas
     }
     return a.waktu.compareTo(b.waktu);
   });
@@ -217,7 +222,7 @@ void main() {
   String? pilihan;
   while (pilihan != "0") {
     tampilkanMenu();
-    pilihan = stdin.readLineSync()?.trim();
+    pilihan = stdin.readLineSync();
     
     switch (pilihan) {
       case '1':

@@ -32,7 +32,6 @@ class Kegiatan {
 }
 
 List<Kegiatan> daftarKegiatan = [];
-
 // Menyimpan daftar kegiatan ke file
 void simpanKeFile() {
   final file = File('agenda.json');
